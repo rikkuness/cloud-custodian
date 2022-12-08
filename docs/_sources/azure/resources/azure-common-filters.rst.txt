@@ -6,10 +6,16 @@ Azure Common Filters
 Filters
 
 
+   - :ref:`authentication <Azure.common.filters.authentication>`
+
+
    - :ref:`azure-ad-administrators <Azure.common.filters.azure-ad-administrators>`
 
 
    - :ref:`configuration <Azure.common.filters.configuration>`
+
+
+   - :ref:`configuration-parameter <Azure.common.filters.configuration-parameter>`
 
 
    - :ref:`cost <Azure.common.filters.cost>`
@@ -65,6 +71,119 @@ Filters
 
    - :ref:`vm-extensions <Azure.common.filters.vm-extensions>`
 
+
+   - :ref:`vulnerability-assessment <Azure.common.filters.vulnerability-assessment>`
+
+
+
+
+.. _Azure.common.filters.authentication:
+
+authentication
+++++++++++++++
+
+Web Applications Authentication Filter
+
+:example:
+
+This policy will find all web apps without an authentication method enabled
+
+.. code-block:: yaml
+
+    policies:
+      - name: webapp-no-authentication
+        resource: azure.webapp
+        filters:
+          - type: authentication
+            key: enabled
+            value: False
+            op: eq
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      default:
+        type: object
+      key:
+        type: string
+      op:
+        enum:
+        - eq
+        - equal
+        - ne
+        - not-equal
+        - gt
+        - greater-than
+        - ge
+        - gte
+        - le
+        - lte
+        - lt
+        - less-than
+        - glob
+        - regex
+        - regex-case
+        - in
+        - ni
+        - not-in
+        - contains
+        - difference
+        - intersect
+      type:
+        enum:
+        - authentication
+      value:
+        oneOf:
+        - type: array
+        - type: string
+        - type: boolean
+        - type: number
+        - type: 'null'
+      value_from:
+        additionalProperties: 'False'
+        properties:
+          expr:
+            oneOf:
+            - type: integer
+            - type: string
+          format:
+            enum:
+            - csv
+            - json
+            - txt
+            - csv2dict
+          url:
+            type: string
+        required:
+        - url
+        type: object
+      value_regex:
+        type: string
+      value_type:
+        enum:
+        - age
+        - integer
+        - expiration
+        - normalize
+        - size
+        - cidr
+        - cidr_size
+        - swap
+        - resource_count
+        - expr
+        - unique_size
+        - date
+        - version
+    required:
+    - type
 
 
 
@@ -279,6 +398,143 @@ configuration
         - date
         - version
     required:
+    - type
+
+
+
+.. _Azure.common.filters.configuration-parameter:
+
+configuration-parameter
++++++++++++++++++++++++
+
+Filter by configuration parameter for this postresql server
+
+Configurations are made available to the filter as a map with each
+key holding the name of the configuration and each value holding
+the properties of the Configuration as defined here:
+https://learn.microsoft.com/en-us/python/api/azure-mgmt-rdbms/azure.mgmt.rdbms.postgresql.models.configuration?view=azure-python
+
+:example:
+
+Example JSON document showing the data format provided to the filter
+
+.. code-block:: json
+
+  {
+    "value": "off",
+    "description": "Logs each successful connection.",
+    "defaultValue": "on",
+    "dataType": "Boolean",
+    "allowedValues": "on,off",
+    "source": "user-override",
+    "isConfigPendingRestart": "False",
+    "isDynamicConfig": "True"
+  }
+
+:example:
+
+Find Postgresql servers with log_connections not enabled
+
+.. code-block:: yaml
+
+    policies:
+      - name: sql-database-no-log-connections
+        resource: azure.postgresql-server
+        filters:
+          - type: configuration-parameter
+            name: log_connections
+            key: value
+            op: ne
+            value: 'on'
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      default:
+        type: object
+      key:
+        type: string
+      name:
+        type: string
+      op:
+        enum:
+        - eq
+        - equal
+        - ne
+        - not-equal
+        - gt
+        - greater-than
+        - ge
+        - gte
+        - le
+        - lte
+        - lt
+        - less-than
+        - glob
+        - regex
+        - regex-case
+        - in
+        - ni
+        - not-in
+        - contains
+        - difference
+        - intersect
+      type:
+        enum:
+        - configuration-parameter
+      value:
+        oneOf:
+        - type: array
+        - type: string
+        - type: boolean
+        - type: number
+        - type: 'null'
+      value_from:
+        additionalProperties: 'False'
+        properties:
+          expr:
+            oneOf:
+            - type: integer
+            - type: string
+          format:
+            enum:
+            - csv
+            - json
+            - txt
+            - csv2dict
+          url:
+            type: string
+        required:
+        - url
+        type: object
+      value_regex:
+        type: string
+      value_type:
+        enum:
+        - age
+        - integer
+        - expiration
+        - normalize
+        - size
+        - cidr
+        - cidr_size
+        - swap
+        - resource_count
+        - expr
+        - unique_size
+        - date
+        - version
+    required:
+    - type
+    - name
     - type
 
 
@@ -2063,6 +2319,146 @@ Find VM's without the OMS agent installed
       type:
         enum:
         - vm-extensions
+      value:
+        oneOf:
+        - type: array
+        - type: string
+        - type: boolean
+        - type: number
+        - type: 'null'
+      value_from:
+        additionalProperties: 'False'
+        properties:
+          expr:
+            oneOf:
+            - type: integer
+            - type: string
+          format:
+            enum:
+            - csv
+            - json
+            - txt
+            - csv2dict
+          url:
+            type: string
+        required:
+        - url
+        type: object
+      value_regex:
+        type: string
+      value_type:
+        enum:
+        - age
+        - integer
+        - expiration
+        - normalize
+        - size
+        - cidr
+        - cidr_size
+        - swap
+        - resource_count
+        - expr
+        - unique_size
+        - date
+        - version
+    required:
+    - type
+
+
+
+.. _Azure.common.filters.vulnerability-assessment:
+
+vulnerability-assessment
+++++++++++++++++++++++++
+
+Filter sql servers by whether they have recurring vulnerability scans
+enabled.
+
+:example:
+
+Find SQL servers without vulnerability assessments enabled (legacy)
+
+.. code-block:: yaml
+
+    policies:
+      - name: sql-server-no-va
+        resource: azure.sql-server
+        filters:
+          - type: vulnerability-assessment
+            enabled: false
+
+:example:
+
+Find SQL Servers where vulnerability assessments are not being sent to a
+required email
+
+.. code-block:: yaml
+
+    policies:
+      - name: sql-server-no-email
+        resource: azure.sql-server
+        filters:
+          - type: vulnerability-assessment
+            key: recurringScans.emails[?@ == `required@ops.domain`]
+            value: empty
+
+When using the above value filter form, the data takes the following shape:
+
+.. code-block:: json
+
+    "storageContainerPath": "https://testznubm7c1.blob.core.windows.net/testznubm7c1/",
+    "recurringScans": {
+        "isEnabled": true,
+        "emailSubscriptionAdmins": false,
+        "emails": [
+            "ops@fake.email",
+            "admins@fake.email"
+        ]
+    }
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      default:
+        type: object
+      enabled:
+        type: boolean
+      key:
+        type: string
+      op:
+        enum:
+        - eq
+        - equal
+        - ne
+        - not-equal
+        - gt
+        - greater-than
+        - ge
+        - gte
+        - le
+        - lte
+        - lt
+        - less-than
+        - glob
+        - regex
+        - regex-case
+        - in
+        - ni
+        - not-in
+        - contains
+        - difference
+        - intersect
+      type:
+        enum:
+        - vulnerability-assessment
       value:
         oneOf:
         - type: array

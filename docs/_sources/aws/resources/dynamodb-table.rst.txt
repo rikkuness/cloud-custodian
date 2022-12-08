@@ -14,6 +14,10 @@ Filters
 
   - :ref:`config-compliance <aws.common.filters.config-compliance>`
   
+  - :ref:`consecutive-aws-backups <aws.dynamodb-table.filters.consecutive-aws-backups>`
+
+  - :ref:`consecutive-backups <aws.dynamodb-table.filters.consecutive-backups>`
+
   - :ref:`continuous-backup <aws.dynamodb-table.filters.continuous-backup>`
 
   - :ref:`event <aws.common.filters.event>`
@@ -36,6 +40,131 @@ Filters
   
   - :ref:`value <aws.common.filters.value>`
   
+
+
+.. _aws.dynamodb-table.filters.consecutive-aws-backups:
+
+consecutive-aws-backups
++++++++++++++++++++++++
+Returns resources where number of consective backups (based on the
+periodicity defined in the filter) is equal to/or greater than n units.
+This filter supports the resources that use AWS Backup service for backups.
+:example:
+.. code-block:: yaml
+        policies:
+          - name: dynamodb-consecutive-aws-backup-count
+            resource: dynamodb-table
+            filters:
+              - type: consecutive-aws-backups
+                count: 7
+                period: days
+                status: 'COMPLETED'
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      count:
+        minimum: 1
+        type: number
+      period:
+        enum:
+        - hours
+        - days
+        - weeks
+      status:
+        enum:
+        - COMPLETED
+        - PARTIAL
+        - DELETING
+        - EXPIRED
+      type:
+        enum:
+        - consecutive-aws-backups
+    required:
+    - count
+    - period
+    - status
+    - type
+
+
+
+
+Permissions - backup:ListRecoveryPointsByResource
+
+
+.. _aws.dynamodb-table.filters.consecutive-backups:
+
+consecutive-backups
++++++++++++++++++++
+Returns tables where number of consective daily backups is
+equal to/or greater than n days.
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: dynamodb-daily-backup-count
+            resource: dynamodb-table
+            filters:
+              - type: consecutive-backups
+                count: 7
+                period: days
+                backuptype: SYSTEM
+                status: AVAILABLE
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      backuptype:
+        enum:
+        - SYSTEM
+        - USER
+        - AWS_BACKUP
+        - ALL
+      count:
+        minimum: 1
+        type: number
+      period:
+        enum:
+        - hours
+        - days
+        - weeks
+      status:
+        enum:
+        - AVAILABLE
+        - CREATING
+        - DELETED
+      type:
+        enum:
+        - consecutive-backups
+    required:
+    - count
+    - period
+    - status
+    - backuptype
+    - type
+
+
+
+
+Permissions - dynamodb:ListBackups, dynamodb:DescribeBackup, dynamodb:DescribeTable
 
 
 .. _aws.dynamodb-table.filters.continuous-backup:

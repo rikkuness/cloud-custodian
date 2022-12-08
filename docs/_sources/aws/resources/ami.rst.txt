@@ -231,6 +231,10 @@ Actions
   
   - :ref:`rename-tag <aws.common.actions.rename-tag>`
   
+  - :ref:`set-deprecation <aws.ami.actions.set-deprecation>`
+
+  - :ref:`set-permissions <aws.ami.actions.set-permissions>`
+
   - :ref:`tag <aws.common.actions.tag>`
   
   - :ref:`tag-trim <aws.common.actions.tag-trim>`
@@ -351,6 +355,9 @@ remove-launch-permissions
 +++++++++++++++++++++++++
 Action to remove the ability to launch an instance from an AMI
 
+DEPRECATED - use set-permissions instead to support AWS Organizations
+sharing as well as adding permissions
+
 This action will remove any launch permissions granted to other
 AWS accounts from the image, leaving only the owner capable of
 launching it
@@ -366,7 +373,7 @@ launching it
               - type: image-age
                 days: 60
             actions:
-              - remove-launch-permissions
+              - type: remove-launch-permissions
 
 .. container:: toggle
 
@@ -389,6 +396,151 @@ launching it
       type:
         enum:
         - remove-launch-permissions
+    required:
+    - type
+
+
+
+
+Permissions - ec2:ResetImageAttribute, ec2:ModifyImageAttribute
+
+
+.. _aws.ami.actions.set-deprecation:
+
+set-deprecation
++++++++++++++++
+Action to enable or disable AMI deprecation
+
+To prevent deprecation of all AMIs, it is advised to use in conjunction with
+a filter (such as image-age)
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: ami-deprecate-old
+            resource: ami
+            filters:
+              - type: image-age
+                days: 30
+            actions:
+              - type: set-deprecation
+                #Number of days from AMI creation
+                age: 90
+                #Number of days from now
+                #days: 90
+                #Specific date/time
+                #date: "2023-11-30"
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      age:
+        type: integer
+      date:
+        type: string
+      days:
+        type: integer
+      type:
+        enum:
+        - set-deprecation
+    required:
+    - type
+
+
+
+
+Permissions - ec2:EnableImageDeprecation, ec2:DisableImageDeprecation
+
+
+.. _aws.ami.actions.set-permissions:
+
+set-permissions
++++++++++++++++
+Set or remove AMI launch permissions
+
+This action will add or remove launch permissions granted to other
+AWS accounts, organizations or organizational units from the image.
+
+Use the 'add' and 'remove' parameters to control which principals
+to add or remove, respectively.  The default is to remove any permissions
+granted to other AWS accounts.  Principals can be an AWS account id,
+an organization ARN, or an organizational unit ARN
+
+Use 'remove: matched' in combination with the 'cross-account' filter
+for more flexible removal options such as preserving access for a set of
+whitelisted accounts:
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: ami-share-remove-cross-account
+            resource: ami
+            filters:
+              - type: cross-account
+                whitelist:
+                  - '112233445566'
+                  - 'arn:aws:organizations::112233445566:organization/o-xxyyzzaabb'
+                  - 'arn:aws:organizations::112233445566:ou/o-xxyyzzaabb/ou-xxyy-aabbccdd'
+            actions:
+              - type: set-permissions
+                remove: matched
+            # To remove all permissions
+            # - type: set-permissions
+            # To remove public permissions
+            # - type: set-permissions
+            #   remove:
+            #     - all
+            # To remove specific permissions
+            # - type: set-permissions
+            #   remove:
+            #     - '223344556677'
+            #     - 'arn:aws:organizations::112233445566:organization/o-zzyyxxbbaa'
+            #     - 'arn:aws:organizations::112233445566:ou/o-zzyyxxbbaa/ou-xxyy-ddccbbaa'
+            # To set specific permissions
+            # - type: set-permissions
+            #   remove: matched
+            #   add:
+            #     - '223344556677'
+            #     - 'arn:aws:organizations::112233445566:organization/o-zzyyxxbbaa'
+            #     - 'arn:aws:organizations::112233445566:ou/o-zzyyxxbbaa/ou-xxyy-ddccbbaa'
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      add:
+        items:
+          type: string
+        type: array
+      remove:
+        oneOf:
+        - enum:
+          - matched
+        - items:
+            type: string
+          type: array
+      type:
+        enum:
+        - set-permissions
     required:
     - type
 

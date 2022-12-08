@@ -14,6 +14,10 @@ Filters
 
   - :ref:`config-compliance <aws.common.filters.config-compliance>`
   
+  - :ref:`consecutive-aws-backups <aws.redshift.filters.consecutive-aws-backups>`
+
+  - :ref:`consecutive-snapshots <aws.redshift.filters.consecutive-snapshots>`
+
   - :ref:`default-vpc <aws.redshift.filters.default-vpc>`
 
   - :ref:`event <aws.common.filters.event>`
@@ -48,6 +52,124 @@ Filters
   
   - :ref:`value <aws.common.filters.value>`
   
+
+
+.. _aws.redshift.filters.consecutive-aws-backups:
+
+consecutive-aws-backups
++++++++++++++++++++++++
+Returns resources where number of consective backups (based on the
+periodicity defined in the filter) is equal to/or greater than n units.
+This filter supports the resources that use AWS Backup service for backups.
+:example:
+.. code-block:: yaml
+        policies:
+          - name: dynamodb-consecutive-aws-backup-count
+            resource: dynamodb-table
+            filters:
+              - type: consecutive-aws-backups
+                count: 7
+                period: days
+                status: 'COMPLETED'
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      count:
+        minimum: 1
+        type: number
+      period:
+        enum:
+        - hours
+        - days
+        - weeks
+      status:
+        enum:
+        - COMPLETED
+        - PARTIAL
+        - DELETING
+        - EXPIRED
+      type:
+        enum:
+        - consecutive-aws-backups
+    required:
+    - count
+    - period
+    - status
+    - type
+
+
+
+
+Permissions - backup:ListRecoveryPointsByResource
+
+
+.. _aws.redshift.filters.consecutive-snapshots:
+
+consecutive-snapshots
++++++++++++++++++++++
+Returns Clusters where number of consective daily backups is
+equal to/or greater than n days.
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: redshift-daily-snapshot-count
+            resource: redshift
+            filters:
+              - type: consecutive-snapshots
+                count: 7
+                period: days
+                status: available
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      count:
+        minimum: 1
+        type: number
+      period:
+        enum:
+        - hours
+        - days
+        - weeks
+      status:
+        enum:
+        - available
+        - creating
+        - final snapshot
+        - failed
+      type:
+        enum:
+        - consecutive-snapshots
+    required:
+    - count
+    - period
+    - status
+    - type
+
+
+
+
+Permissions - redshift:DescribeClusterSnapshots, redshift:DescribeClusters
 
 
 .. _aws.redshift.filters.default-vpc:

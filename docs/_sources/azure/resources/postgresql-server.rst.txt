@@ -43,6 +43,8 @@ Filters
 -------
 
 
+  - :ref:`configuration-parameter <azure.common.filters.configuration-parameter>`
+  
   - :ref:`cost <azure.common.filters.cost>`
   
   - :ref:`diagnostic-settings <azure.common.filters.diagnostic-settings>`

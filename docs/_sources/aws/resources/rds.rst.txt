@@ -15,10 +15,16 @@ Filters
 
   - :ref:`config-compliance <aws.common.filters.config-compliance>`
   
+  - :ref:`consecutive-snapshots <aws.rds.filters.consecutive-snapshots>`
+
+  - :ref:`db-option-groups <aws.rds.filters.db-option-groups>`
+
   - :ref:`db-parameter <aws.rds.filters.db-parameter>`
 
   - :ref:`default-vpc <aws.rds.filters.default-vpc>`
 
+  - :ref:`engine <aws.common.filters.engine>`
+  
   - :ref:`event <aws.common.filters.event>`
   
   - :ref:`finding <aws.common.filters.finding>`
@@ -55,6 +61,162 @@ Filters
   
   - :ref:`vpc <aws.common.filters.vpc>`
   
+
+
+.. _aws.rds.filters.consecutive-snapshots:
+
+consecutive-snapshots
++++++++++++++++++++++
+Returns instances where number of consective daily snapshots is
+equal to/or greater than n days.
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: rds-daily-snapshot-count
+            resource: rds
+            filters:
+              - type: consecutive-snapshots
+                days: 7
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      days:
+        minimum: 1
+        type: number
+      type:
+        enum:
+        - consecutive-snapshots
+    required:
+    - days
+    - type
+
+
+
+
+Permissions - rds:DescribeDBSnapshots, rds:DescribeDBInstances
+
+
+.. _aws.rds.filters.db-option-groups:
+
+db-option-groups
+++++++++++++++++
+This filter describes RDS option groups for associated RDS instances.
+
+:example:
+
+.. code-block:: yaml
+
+    policies:
+      - name: rds-data-in-transit-encrypted
+        resource: aws.rds
+        filters:
+          - type: db-option-groups
+            key: OptionName
+            value: NATIVE_NETWORK_ENCRYPTION
+            op: eq
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      default:
+        type: object
+      key:
+        type: string
+      op:
+        enum:
+        - eq
+        - equal
+        - ne
+        - not-equal
+        - gt
+        - greater-than
+        - ge
+        - gte
+        - le
+        - lte
+        - lt
+        - less-than
+        - glob
+        - regex
+        - regex-case
+        - in
+        - ni
+        - not-in
+        - contains
+        - difference
+        - intersect
+      type:
+        enum:
+        - db-option-groups
+      value:
+        oneOf:
+        - type: array
+        - type: string
+        - type: boolean
+        - type: number
+        - type: 'null'
+      value_from:
+        additionalProperties: 'False'
+        properties:
+          expr:
+            oneOf:
+            - type: integer
+            - type: string
+          format:
+            enum:
+            - csv
+            - json
+            - txt
+            - csv2dict
+          url:
+            type: string
+        required:
+        - url
+        type: object
+      value_regex:
+        type: string
+      value_type:
+        enum:
+        - age
+        - integer
+        - expiration
+        - normalize
+        - size
+        - cidr
+        - cidr_size
+        - swap
+        - resource_count
+        - expr
+        - unique_size
+        - date
+        - version
+    required:
+    - type
+
+
+
+
+Permissions - rds:DescribeDBInstances, rds:DescribeOptionGroups
 
 
 .. _aws.rds.filters.db-parameter:

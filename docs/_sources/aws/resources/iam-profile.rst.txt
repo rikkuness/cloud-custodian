@@ -12,10 +12,14 @@ Filters
 -------
 
 
+  - :ref:`config-compliance <aws.common.filters.config-compliance>`
+  
   - :ref:`event <aws.common.filters.event>`
   
   - :ref:`finding <aws.common.filters.finding>`
   
+  - :ref:`has-specific-managed-policy <aws.iam-profile.filters.has-specific-managed-policy>`
+
   - :ref:`ops-item <aws.common.filters.ops-item>`
   
   - :ref:`reduce <aws.common.filters.reduce>`
@@ -26,6 +30,50 @@ Filters
 
   - :ref:`value <aws.common.filters.value>`
   
+
+
+.. _aws.iam-profile.filters.has-specific-managed-policy:
+
+has-specific-managed-policy
++++++++++++++++++++++++++++
+Filter an IAM instance profile that contains an IAM role that has a specific managed IAM
+   policy. If an IAM instance profile does not contain an IAM role, then it will be treated
+   as not having the policy.
+
+:Example:
+
+.. code-block:: yaml
+
+    policies:
+      - name: iam-profile-has-admin-policy
+        resource: iam-profile
+        filters:
+          - type: has-specific-managed-policy
+            value: admin-policy
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      type:
+        enum:
+        - has-specific-managed-policy
+      value:
+        type: string
+    required:
+    - type
+
+
+
+
+Permissions - iam:ListAttachedRolePolicies
 
 
 .. _aws.iam-profile.filters.unused:
@@ -124,7 +172,52 @@ Actions
   
   - :ref:`put-metric <aws.common.actions.put-metric>`
   
+  - :ref:`set-role <aws.iam-profile.actions.set-role>`
+
   - :ref:`webhook <aws.common.actions.webhook>`
   
 
+
+
+.. _aws.iam-profile.actions.set-role:
+
+set-role
+++++++++
+Upserts specified role name for IAM instance profiles.
+   Instance profile roles are removed when empty role name is specified.
+
+:example:
+
+.. code-block:: yaml
+
+    policies:
+      - name: iam-instance-profile-set-role
+        resource: iam-profile
+        actions:
+            - type: set-role
+              role: my-test-role
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      role:
+        type: string
+      type:
+        enum:
+        - set-role
+    required:
+    - type
+
+
+
+
+Permissions - iam:AddRoleToInstanceProfile, iam:RemoveRoleFromInstanceProfile
 

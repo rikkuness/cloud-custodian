@@ -21,6 +21,9 @@ Actions
    - :ref:`mark-for-op <AWS.common.actions.mark-for-op>`
 
 
+   - :ref:`modify-ecr-policy <AWS.common.actions.modify-ecr-policy>`
+
+
    - :ref:`modify-policy <AWS.common.actions.modify-policy>`
 
 
@@ -129,6 +132,12 @@ References
           - FederatedUser
           type: string
         type: array
+      value:
+        enum:
+        - userName
+        - arn
+        - sourceIPAddress
+        type: string
     required:
     - tag
     - type
@@ -171,6 +180,24 @@ To raise an error when related resources cannot be found, use the
                   resource: ebs
                   skip_missing: True
                   key: VolumeId
+                  tags: '*'
+
+In the event that the resource type is not supported in Cloud Custodian but
+is supported in the resources groups tagging api, use the resourcegroupstaggingapi
+resource type to reference the resource. The value should be an ARN for the
+related resource.
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+            - name: copy-tags-from-unsupported-resource
+              resource: ebs-snapshot
+              actions:
+                - type: copy-related-tag
+                  resource: resourcegroupstaggingapi
+                  key: tag:a-resource-tag
                   tags: '*'
 
 .. container:: toggle
@@ -230,6 +257,7 @@ Example::
 
  - type: invoke-lambda
    function: my-function
+   assume-role: iam-role-arn
 
 Note if your synchronously invoking the lambda, you may also need
 to configure the timeout, to avoid multiple invokes. The default
@@ -248,6 +276,8 @@ arguments. Alternatively use async: true
   .. code-block:: yaml
 
     properties:
+      assume-role:
+        type: string
       async:
         type: boolean
       batch_size:
@@ -391,6 +421,126 @@ Tag resources for future action.
         - mark-for-op
       tz:
         type: string
+    required:
+    - type
+
+
+
+.. _AWS.common.actions.modify-ecr-policy:
+
+modify-ecr-policy
++++++++++++++++++
+
+Action to modify ECR policy statements.
+
+:example:
+
+.. code-block:: yaml
+
+       policies:
+          - name: ecr-image-prevent-pull
+            resource: ecr-image
+            filters:
+              - type: finding
+            actions:
+              - type: modify-ecr-policy
+                add-statements: [{
+                    "Sid": "ReplaceWithMe",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Action": ["ecr:BatchGetImage"]
+                        }]
+                remove-statements: "*"
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      add-statements:
+        items:
+          oneOf:
+          - required:
+            - Principal
+            - Action
+          - required:
+            - NotPrincipal
+            - Action
+          - required:
+            - Principal
+            - NotAction
+          - required:
+            - NotPrincipal
+            - NotAction
+          properties:
+            Action:
+              anyOf:
+              - pattern: ^ecr:[a-zA-Z]*$
+                type: string
+              - items:
+                  pattern: ^ecr:[a-zA-Z]*$
+                  type: string
+                type: array
+            Condition:
+              type: object
+            Effect:
+              enum:
+              - Allow
+              - Deny
+              type: string
+            NotAction:
+              anyOf:
+              - pattern: ^ecr:[a-zA-Z]*$
+                type: string
+              - items:
+                  pattern: ^ecr:[a-zA-Z]*$
+                  type: string
+                type: array
+            NotPrincipal:
+              anyOf:
+              - type: object
+              - type: array
+            NotResource:
+              anyOf:
+              - type: string
+              - type: array
+            Principal:
+              anyOf:
+              - type: string
+              - type: object
+              - type: array
+            Resource:
+              anyOf:
+              - type: string
+              - type: array
+            Sid:
+              type: string
+          required:
+          - Sid
+          - Effect
+          type: object
+        type: array
+      remove-statements:
+        oneOf:
+        - enum:
+          - matched
+          - '*'
+        - items:
+            type: string
+          type: array
+        type:
+        - array
+        - string
+      schema_alias: false
+      type:
+        enum:
+        - modify-ecr-policy
     required:
     - type
 

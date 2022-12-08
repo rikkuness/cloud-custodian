@@ -12,12 +12,18 @@ Filters
 -------
 
 
+  - :ref:`check-secure-transport <aws.efs.filters.check-secure-transport>`
+
   - :ref:`config-compliance <aws.common.filters.config-compliance>`
   
+  - :ref:`consecutive-aws-backups <aws.efs.filters.consecutive-aws-backups>`
+
   - :ref:`event <aws.common.filters.event>`
   
   - :ref:`finding <aws.common.filters.finding>`
   
+  - :ref:`has-statement <aws.efs.filters.has-statement>`
+
   - :ref:`health-event <aws.common.filters.health-event>`
   
   - :ref:`json-diff <aws.efs.filters.json-diff>`
@@ -38,6 +44,210 @@ Filters
   
   - :ref:`value <aws.common.filters.value>`
   
+
+
+.. _aws.efs.filters.check-secure-transport:
+
+check-secure-transport
+++++++++++++++++++++++
+Find EFS that does not enforce secure transport
+
+:Example:
+
+.. code-block:: yaml
+
+ - name: efs-securetransport-check-policy
+   resource: efs
+   filters:
+     - check-secure-transport
+
+To configure an EFS to enforce secure transport, set up the appropriate
+Effect and Condition for its policy document. For example:
+
+.. code-block:: json
+
+    {
+        "Sid": "efs-statement-b3f6b59b-d938-4001-9154-508f67707073",
+        "Effect": "Deny",
+        "Principal": { "AWS": "*" },
+        "Action": "*",
+        "Condition": {
+            "Bool": { "aws:SecureTransport": "false" }
+        }
+    }
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      type:
+        enum:
+        - check-secure-transport
+    required:
+    - type
+
+
+
+
+Permissions - elasticfilesystem:DescribeFileSystemPolicy
+
+
+.. _aws.efs.filters.consecutive-aws-backups:
+
+consecutive-aws-backups
++++++++++++++++++++++++
+Returns resources where number of consective backups (based on the
+periodicity defined in the filter) is equal to/or greater than n units.
+This filter supports the resources that use AWS Backup service for backups.
+:example:
+.. code-block:: yaml
+        policies:
+          - name: dynamodb-consecutive-aws-backup-count
+            resource: dynamodb-table
+            filters:
+              - type: consecutive-aws-backups
+                count: 7
+                period: days
+                status: 'COMPLETED'
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      count:
+        minimum: 1
+        type: number
+      period:
+        enum:
+        - hours
+        - days
+        - weeks
+      status:
+        enum:
+        - COMPLETED
+        - PARTIAL
+        - DELETING
+        - EXPIRED
+      type:
+        enum:
+        - consecutive-aws-backups
+    required:
+    - count
+    - period
+    - status
+    - type
+
+
+
+
+Permissions - backup:ListRecoveryPointsByResource
+
+
+.. _aws.efs.filters.has-statement:
+
+has-statement
++++++++++++++
+Find resources with matching access policy statements.
+:example:
+.. code-block:: yaml
+        policies:
+          - name: sns-check-statement-id
+            resource: sns
+            filters:
+              - type: has-statement
+                statement_ids:
+                  - BlockNonSSL
+        policies:
+          - name: sns-check-block-non-ssl
+            resource: sns
+            filters:
+              - type: has-statement
+                statements:
+                  - Effect: Deny
+                    Action: 'SNS:Publish'
+                    Principal: '*'
+                    Condition:
+                        Bool:
+                            "aws:SecureTransport": "false"
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      statement_ids:
+        items:
+          type: string
+        type: array
+      statements:
+        items:
+          properties:
+            Action:
+              anyOf:
+              - type: string
+              - type: array
+            Condition:
+              type: object
+            Effect:
+              enum:
+              - Allow
+              - Deny
+              type: string
+            NotAction:
+              anyOf:
+              - type: string
+              - type: array
+            NotPrincipal:
+              anyOf:
+              - type: object
+              - type: array
+            NotResource:
+              anyOf:
+              - type: string
+              - type: array
+            Principal:
+              anyOf:
+              - type: string
+              - type: object
+              - type: array
+            Resource:
+              anyOf:
+              - type: string
+              - type: array
+            Sid:
+              type: string
+          required:
+          - Effect
+          type: object
+        type: array
+      type:
+        enum:
+        - has-statement
+    required:
+    - type
+
+
+
 
 
 .. _aws.efs.filters.json-diff:

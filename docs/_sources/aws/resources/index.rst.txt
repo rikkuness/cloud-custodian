@@ -26,7 +26,11 @@ be applies for all resources.
 
    group-apigateway.rst
 
+   group-apigatewayv2.rst
+
    group-appflow.rst
+
+   group-appsync.rst
 
    group-autoscaling.rst
 
@@ -65,6 +69,8 @@ be applies for all resources.
    group-cognito-idp.rst
 
    group-config.rst
+
+   group-connect.rst
 
    group-datapipeline.rst
 
@@ -108,6 +114,8 @@ be applies for all resources.
 
    group-firehose.rst
 
+   group-fis.rst
+
    group-fsx.rst
 
    group-gamelift.rst
@@ -133,6 +141,8 @@ be applies for all resources.
    group-kinesisvideo.rst
 
    group-kms.rst
+
+   group-lakeformation.rst
 
    group-lambda.rst
 
@@ -161,6 +171,8 @@ be applies for all resources.
    group-route53.rst
 
    group-route53domains.rst
+
+   group-route53resolver.rst
 
    group-s3.rst
 
@@ -199,5 +211,7 @@ be applies for all resources.
    group-waf.rst
 
    group-waf-regional.rst
+
+   group-wafv2.rst
 
    group-workspaces.rst

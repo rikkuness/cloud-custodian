@@ -13,6 +13,8 @@ Filters
 -------
 
 
+  - :ref:`compute-meta <gcp.common.filters.compute-meta>`
+  
   - :ref:`event <gcp.common.filters.event>`
   
   - :ref:`iam-policy <gcp.project.filters.iam-policy>`

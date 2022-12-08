@@ -218,6 +218,8 @@ Actions
   
   - :ref:`remove-tag <aws.common.actions.remove-tag>`
   
+  - :ref:`set-rule-state <aws.event-rule.actions.set-rule-state>`
+
   - :ref:`tag <aws.common.actions.tag>`
   
   - :ref:`webhook <aws.common.actions.webhook>`
@@ -267,4 +269,47 @@ Delete an event rule, force target removal with the `force` option
 
 
 Permissions - events:DeleteRule, events:RemoveTargets, events:ListTargetsByRule
+
+
+.. _aws.event-rule.actions.set-rule-state:
+
+set-rule-state
+++++++++++++++
+This action allows to enable/disable a rule
+
+:example:
+.. code-block:: yaml
+    policies:
+        - name: test-rule
+          resource: aws.event-rule
+          filters:
+            - Name: my-event-rule
+          actions:
+            - type: set-rule-state
+              enabled: true
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      enabled:
+        default: true
+        type: boolean
+      type:
+        enum:
+        - set-rule-state
+    required:
+    - type
+
+
+
+
+Permissions - events:EnableRule, events:DisableRule
 

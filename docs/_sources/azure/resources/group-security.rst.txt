@@ -10,6 +10,12 @@ Security resources
 
    advisor-recommendation.rst
 
+   defender-autoprovisioning.rst
+
+   defender-pricing.rst
+
+   defender-setting.rst
+
    keyvault.rst
 
    keyvault-certificate.rst

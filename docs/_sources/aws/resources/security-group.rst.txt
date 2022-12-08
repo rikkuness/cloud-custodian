@@ -202,6 +202,28 @@ a given set of ports, *note* OnlyPorts is an inverse match.
       op: in
       value: x.y.z
 
+`value_type: cidr` can also filter if cidr is a subset of cidr
+value range. In this example we are allowing any smaller cidrs within
+allowed_cidrs.csv.
+
+.. code-block:: yaml
+
+  - type: ingress
+    Cidr:
+      value_type: cidr
+      op: not-in
+      value_from:
+        url: s3://a-policy-data-us-west-2/allowed_cidrs.csv
+        format: csv
+
+or value can be specified as a list:
+
+  - type: ingress
+    Cidr:
+      value_type: cidr
+      op: not-in
+      value: ["10.0.0.0/8", "192.168.0.0/16"]
+
 `Cidr` can match ipv4 rules and `CidrV6` can match ipv6 rules.  In
 this example we are blocking global inbound connections to SSH or
 RDP.
@@ -254,6 +276,33 @@ SGs that have a description of "default - DO NOT USE".
       key: 'Description'
       value: 'default - DO NOT USE'
       op: equal
+
+By default, this filter matches a security group rule if
+_all_ of its keys match. Using `match-operator: or` causes a match
+if _any_ key matches. This can help consolidate some simple
+cases that would otherwise require multiple filters. To find
+security groups that allow all inbound traffic over IPv4 or IPv6,
+for example, we can use two filters inside an `or` block:
+
+.. code-block:: yaml
+
+  - or:
+    - type: ingress
+      Cidr: "0.0.0.0/0"
+    - type: ingress
+      CidrV6: "::/0"
+
+or combine them into a single filter:
+
+.. code-block:: yaml
+
+  - type: ingress
+    match-operator: or
+      Cidr: "0.0.0.0/0"
+      CidrV6: "::/0"
+
+Note that evaluating _combinations_ of factors (e.g. traffic over
+port 22 from 0.0.0.0/0) still requires separate filters.
 
 .. container:: toggle
 
@@ -389,6 +438,28 @@ a given set of ports, *note* OnlyPorts is an inverse match.
       op: in
       value: x.y.z
 
+`value_type: cidr` can also filter if cidr is a subset of cidr
+value range. In this example we are allowing any smaller cidrs within
+allowed_cidrs.csv.
+
+.. code-block:: yaml
+
+  - type: ingress
+    Cidr:
+      value_type: cidr
+      op: not-in
+      value_from:
+        url: s3://a-policy-data-us-west-2/allowed_cidrs.csv
+        format: csv
+
+or value can be specified as a list:
+
+  - type: ingress
+    Cidr:
+      value_type: cidr
+      op: not-in
+      value: ["10.0.0.0/8", "192.168.0.0/16"]
+
 `Cidr` can match ipv4 rules and `CidrV6` can match ipv6 rules.  In
 this example we are blocking global inbound connections to SSH or
 RDP.
@@ -441,6 +512,33 @@ SGs that have a description of "default - DO NOT USE".
       key: 'Description'
       value: 'default - DO NOT USE'
       op: equal
+
+By default, this filter matches a security group rule if
+_all_ of its keys match. Using `match-operator: or` causes a match
+if _any_ key matches. This can help consolidate some simple
+cases that would otherwise require multiple filters. To find
+security groups that allow all inbound traffic over IPv4 or IPv6,
+for example, we can use two filters inside an `or` block:
+
+.. code-block:: yaml
+
+  - or:
+    - type: ingress
+      Cidr: "0.0.0.0/0"
+    - type: ingress
+      CidrV6: "::/0"
+
+or combine them into a single filter:
+
+.. code-block:: yaml
+
+  - type: ingress
+    match-operator: or
+      Cidr: "0.0.0.0/0"
+      CidrV6: "::/0"
+
+Note that evaluating _combinations_ of factors (e.g. traffic over
+port 22 from 0.0.0.0/0) still requires separate filters.
 
 .. container:: toggle
 
@@ -648,19 +746,48 @@ Permissions - lambda:ListFunctions, ec2:DescribeNetworkInterfaces, autoscaling:D
 used
 ++++
 Filter to security groups that are used.
-
 This operates as a complement to the unused filter for multi-step
 workflows.
-
 :example:
-
 .. code-block:: yaml
-
         policies:
           - name: security-groups-in-use
             resource: security-group
             filters:
               - used
+
+        policies:
+          - name: security-groups-used-by-rds
+            resource: security-group
+            filters:
+              - used
+              - type: value
+                key: c7n:InstanceOwnerIds
+                op: intersect
+                value:
+                  - amazon-rds
+
+        policies:
+          - name: security-groups-used-by-natgw
+            resource: security-group
+            filters:
+              - used
+              - type: value
+                key: c7n:InterfaceTypes
+                op: intersect
+                value:
+                  - nat_gateway
+
+        policies:
+          - name: security-groups-used-by-alb
+            resource: security-group
+            filters:
+              - used
+              - type: value
+                key: c7n:InterfaceResourceTypes
+                op: intersect
+                value:
+                  - elb-app
 
 .. container:: toggle
 

@@ -63,7 +63,7 @@ Parent base class for filters and actions.
 
 
 
-Permissions - route53:GetQueryLoggingConfig, route53:GetHostedZone
+Permissions - route53:GetQueryLoggingConfig, route53:GetHostedZone, logs:DescribeSubscriptionFilters
 
 
 .. _aws.hostedzone.filters.shield-enabled:

@@ -65,6 +65,8 @@ Filters
 -------
 
 
+  - :ref:`authentication <azure.common.filters.authentication>`
+  
   - :ref:`configuration <azure.common.filters.configuration>`
   
   - :ref:`cost <azure.common.filters.cost>`

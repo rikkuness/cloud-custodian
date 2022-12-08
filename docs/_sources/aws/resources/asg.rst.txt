@@ -976,6 +976,12 @@ References
           - FederatedUser
           type: string
         type: array
+      value:
+        enum:
+        - userName
+        - arn
+        - sourceIPAddress
+        type: string
     required:
     - type
 

@@ -15,7 +15,7 @@ Returns all azure advisor recommendations of type Security
 
     policies:
     - name: list-advisor-security-recommendations
-      resource: azure.advisor-recommendiation
+      resource: azure.advisor-recommendation
       filters:
         - type: value
           key: properties.category

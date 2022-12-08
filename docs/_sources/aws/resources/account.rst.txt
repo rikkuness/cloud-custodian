@@ -20,6 +20,8 @@ Filters
 
   - :ref:`check-macie <aws.account.filters.check-macie>`
 
+  - :ref:`config-compliance <aws.common.filters.config-compliance>`
+  
   - :ref:`credential <aws.account.filters.credential>`
 
   - :ref:`default-ebs-encryption <aws.account.filters.default-ebs-encryption>`
@@ -38,6 +40,8 @@ Filters
 
   - :ref:`iam-summary <aws.account.filters.iam-summary>`
 
+  - :ref:`lakeformation-s3-cross-account <aws.account.filters.lakeformation-s3-cross-account>`
+
   - :ref:`missing <aws.account.filters.missing>`
 
   - :ref:`ops-item <aws.common.filters.ops-item>`
@@ -51,6 +55,10 @@ Filters
   - :ref:`securityhub <aws.account.filters.securityhub>`
 
   - :ref:`service-limit <aws.account.filters.service-limit>`
+
+  - :ref:`ses-agg-send-stats <aws.common.filters.ses-agg-send-stats>`
+  
+  - :ref:`ses-send-stats <aws.account.filters.ses-send-stats>`
 
   - :ref:`shield-enabled <aws.account.filters.shield-enabled>`
 
@@ -182,6 +190,9 @@ Returns an annotated account resource if trail is not enabled.
 Of particular note, the current-region option will evaluate whether cloudtrail is available
 in the current region, either as a multi region trail or as a trail with it as the home region.
 
+The log-metric-filter-pattern option checks for the existence of a cloudwatch alarm and a
+corresponding SNS subscription for a specific filter pattern
+
 :example:
 
 .. code-block:: yaml
@@ -195,6 +206,8 @@ in the current region, either as a multi region trail or as a trail with it as t
                 global-events: true
                 multi-region: true
                 running: true
+                include-management-events: true
+                log-metric-filter-pattern: "{ ($.eventName = \"ConsoleLogin\") }"
 
 .. container:: toggle
 
@@ -213,9 +226,13 @@ in the current region, either as a multi region trail or as a trail with it as t
         type: boolean
       global-events:
         type: boolean
+      include-management-events:
+        type: boolean
       kms:
         type: boolean
       kms-key:
+        type: string
+      log-metric-filter-pattern:
         type: string
       multi-region:
         type: boolean
@@ -232,7 +249,7 @@ in the current region, either as a multi region trail or as a trail with it as t
 
 
 
-Permissions - cloudtrail:DescribeTrails, cloudtrail:GetTrailStatus
+Permissions - cloudtrail:DescribeTrails, cloudtrail:GetTrailStatus, cloudtrail:GetEventSelectors, cloudwatch:DescribeAlarmsForMetric, logs:DescribeMetricFilters, sns:ListSubscriptions
 
 
 .. _aws.account.filters.check-config:
@@ -1005,6 +1022,114 @@ enabled with root mfa or has root api keys.
 Permissions - iam:GetAccountSummary
 
 
+.. _aws.account.filters.lakeformation-s3-cross-account:
+
+lakeformation-s3-cross-account
+++++++++++++++++++++++++++++++
+Flags an account if its using a lakeformation s3 bucket resource from a different account.
+
+:example:
+
+.. code-block:: yaml
+
+   policies:
+     - name: lakeformation-cross-account-bucket
+       resource: aws.account
+       filters:
+        - type: lakeformation-s3-cross-account
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      default:
+        type: object
+      key:
+        type: string
+      op:
+        enum:
+        - eq
+        - equal
+        - ne
+        - not-equal
+        - gt
+        - greater-than
+        - ge
+        - gte
+        - le
+        - lte
+        - lt
+        - less-than
+        - glob
+        - regex
+        - regex-case
+        - in
+        - ni
+        - not-in
+        - contains
+        - difference
+        - intersect
+      type:
+        enum:
+        - lakeformation-s3-cross-account
+      value:
+        oneOf:
+        - type: array
+        - type: string
+        - type: boolean
+        - type: number
+        - type: 'null'
+      value_from:
+        additionalProperties: 'False'
+        properties:
+          expr:
+            oneOf:
+            - type: integer
+            - type: string
+          format:
+            enum:
+            - csv
+            - json
+            - txt
+            - csv2dict
+          url:
+            type: string
+        required:
+        - url
+        type: object
+      value_regex:
+        type: string
+      value_type:
+        enum:
+        - age
+        - integer
+        - expiration
+        - normalize
+        - size
+        - cidr
+        - cidr_size
+        - swap
+        - resource_count
+        - expr
+        - unique_size
+        - date
+        - version
+    required:
+    - type
+
+
+
+
+Permissions - lakeformation:ListResources
+
+
 .. _aws.account.filters.missing:
 
 missing
@@ -1445,6 +1570,59 @@ advisor.  In this case, some of these checks have no results.
 
 
 Permissions - support:DescribeTrustedAdvisorCheckRefreshStatuses, support:DescribeTrustedAdvisorCheckResult, support:DescribeTrustedAdvisorChecks, support:RefreshTrustedAdvisorCheck
+
+
+.. _aws.account.filters.ses-send-stats:
+
+ses-send-stats
+++++++++++++++
+This filter annotates the account resource with SES send statistics for the
+last n number of days, not including the current date.
+
+The stats are aggregated into daily metrics. Additionally, the filter also
+calculates and annotates the max daily bounce rate (percentage). Using this filter,
+users can alert when the bounce rate for a particular day is higher than the limit.
+
+:example:
+
+.. code-block:: yaml
+
+        policies:
+          - name: ses-send-stats
+            resource: account
+            filters:
+              - type: ses-send-stats
+                days: 5
+              - type: value
+                key: '"c7n:ses-max-bounce-rate"'
+                op: ge
+                value: 10
+
+.. container:: toggle
+
+  
+
+  .. raw:: html
+     
+    <div class="header docutils container" style=""></div>
+
+  .. code-block:: yaml
+
+    properties:
+      days:
+        minimum: 2
+        type: number
+      type:
+        enum:
+        - ses-send-stats
+    required:
+    - days
+    - type
+
+
+
+
+Permissions - ses:GetSendStatistics
 
 
 .. _aws.account.filters.shield-enabled:
